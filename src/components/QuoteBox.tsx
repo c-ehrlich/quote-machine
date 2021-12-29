@@ -66,7 +66,7 @@ const QuoteBox = (props: Props) => {
         </div>
         : <div>Error fetching quotes</div>}
       <button id="new-quote" onClick={getNewQuote}>New Quote</button>
-      {quotes.length !== 0 && <a id="tweet-quote" href={`https://twitter.com/intent/tweet&text="${quotes[activeQuoteNumber].quote}" -${quotes[activeQuoteNumber].author}`}>Tweet</a>}
+      {quotes.length !== 0 && <a id="tweet-quote" href={`https://twitter.com/intent/tweet?text="${quotes[activeQuoteNumber].quote}" -${quotes[activeQuoteNumber].author}&url=https://github.com/c-ehrlich`}>Tweet</a>}
     </StyledQuoteBox>
   );
 };
