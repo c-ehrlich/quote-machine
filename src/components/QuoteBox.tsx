@@ -11,6 +11,9 @@ const StyledQuoteBox = styled.div`
   max-width: 90%;
   height: 300px;
   background-color: #ddd;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
 `;
 
 interface Props {}
@@ -52,17 +55,17 @@ const QuoteBox = (props: Props) => {
   };
 
   useEffect(() => {
-    
     getData().then(() => getNewQuote());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <StyledQuoteBox id="quote-box">
+      <div>Note: this is incredibly low effort. Absolutely not a portfolio project!</div>
       {quotes.length !== 0 && activeQuoteNumber <= quotes.length
         ? <div>
           <div id="text">{quotes[activeQuoteNumber].quote}</div>
-          <div id="author">{quotes[activeQuoteNumber].author}</div>
+          <div id="author">- {quotes[activeQuoteNumber].author}</div>
         </div>
         : <div>Error fetching quotes</div>}
       <button id="new-quote" onClick={getNewQuote}>New Quote</button>
