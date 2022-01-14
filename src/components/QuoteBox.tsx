@@ -1,5 +1,8 @@
-import { useEffect, useState } from "react";
-import styled from "styled-components";
+import { useEffect, useRef, useState } from "react";
+import styled, { css } from "styled-components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTwitterSquare } from "@fortawesome/free-brands-svg-icons";
+import { faRedoAlt } from "@fortawesome/free-solid-svg-icons";
 
 interface Quote {
   quote: string;
@@ -9,28 +12,105 @@ interface Quote {
 const StyledQuoteBox = styled.div`
   width: 600px;
   max-width: 90%;
-  height: 300px;
-  background-color: #ddd;
+  // min-height: 300px;
   display: flex;
   flex-direction: column;
   gap: 1em;
+
+  border-radius: 30px;
+  background: #e6e6e6;
+  box-shadow: 10px 10px 22px rgba(0, 0, 0, 0.2),
+    -10px -10px 22px rgba(255, 255, 255, 0.75);
+  padding: 30px;
 `;
 
-interface Props {}
+const QuoteText = styled.div`
+  font-family: "Lato", sans-serif;
+  font-size: 24px;
+`;
 
-const QuoteBox = (props: Props) => {
+const QuoteAuthor = styled.div`
+  font-family: "Lato", sans-serif;
+  font-size: 16px;
+  text-align: right;
+`;
+
+const neomorphicButton = css`
+  padding: 8px;
+  font-family: "Lato", sans-serif;
+
+  font-size: 18px;
+  font-weight: 400;
+  border-radius: 25px;
+  border: none;
+  background-color: #e6e6e6;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 45px;
+  transition: all 0.4s;
+  box-shadow: 10px 10px 22px rgba(0, 0, 0, 0.2),
+    -10px -10px 22px rgba(255, 255, 255, 0.75);
+  padding: 8px 16px;
+
+  &:active {
+    box-shadow: inset 5px 5px 11px rgba(0, 0, 0, 0.2),
+      inset -5px -5px 11px rgba(255, 255, 255, 0.75);
+  }
+`;
+
+const TweetButton = styled.button`
+  ${neomorphicButton}
+`;
+const RefreshButton = styled.button`
+  ${neomorphicButton}
+  color: #3db166;
+`;
+
+const GapRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+`;
+
+const GapColumn = styled.div`
+  height: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+`;
+
+const GappedFlexColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+interface Quote {
+  quote: string;
+  author: string;
+}
+
+interface QuoteList {
+  quotes: Quote[];
+}
+
+const QuoteBox = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [haveData, setHaveData] = useState<boolean>(false);
   const [activeQuoteNumber, setActiveQuoteNumber] = useState<number>(0);
+  const quoteBox = useRef<HTMLDivElement>(null);
 
   const getData = async () => {
     try {
-      const res = await fetch(
-        "https://gist.githubusercontent.com/camperbot/5a022b72e96c4c9585c32bf6a75f62d9/raw/e3c6895ce42069f0ee7e991229064f167fe8ccdc/quotes.json"
+      const res: Response = await fetch(
+        "https://gist.githubusercontent.com/c-ehrlich/01142ae126f7eaf4eea353e0a2c9a87e/raw/366807970431d54ce0186b3cdf8f531e924fca7d/quotes.json"
       );
-      const data = await res.json();
-      console.log(data.quotes[0].quote);
-      console.log(data.quotes[0].author);
+      const data: QuoteList = await res.json();
       setQuotes(data.quotes);
     } catch (err) {
       console.log(err);
@@ -45,10 +125,15 @@ const QuoteBox = (props: Props) => {
       while (randomNum === activeQuoteNumber) {
         console.log("generating random number");
         randomNum = Math.floor(Math.random() * quotes.length);
-        console.log(`quotes length: ${quotes.length} random number: ${randomNum}`)
+        console.log(
+          `quotes length: ${quotes.length} random number: ${randomNum}`
+        );
       }
       setActiveQuoteNumber(randomNum);
       setHaveData(true);
+
+      quoteBox.current!.classList.add("collapsed");
+      quoteBox.current!.classList.remove("collapsed");
     } else {
       console.log("error fetching quotes");
     }
@@ -56,20 +141,39 @@ const QuoteBox = (props: Props) => {
 
   useEffect(() => {
     getData().then(() => getNewQuote());
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <StyledQuoteBox id="quote-box">
-      <div>Note: this is incredibly low effort. Absolutely not a portfolio project!</div>
-      {quotes.length !== 0 && activeQuoteNumber <= quotes.length
-        ? <div>
-          <div id="text">{quotes[activeQuoteNumber].quote}</div>
-          <div id="author">- {quotes[activeQuoteNumber].author}</div>
-        </div>
-        : <div>Error fetching quotes</div>}
-      <button id="new-quote" onClick={getNewQuote}>New Quote</button>
-      {quotes.length !== 0 && <a id="tweet-quote" href={`https://twitter.com/intent/tweet?text="${quotes[activeQuoteNumber].quote}" -${quotes[activeQuoteNumber].author}&url=https://github.com/c-ehrlich`}>Tweet</a>}
+    <StyledQuoteBox id="quote-box" ref={quoteBox}>
+      <GapColumn>
+        {quotes.length !== 0 && activeQuoteNumber <= quotes.length ? (
+          <GappedFlexColumn>
+            <QuoteText id="text">{quotes[activeQuoteNumber].quote}</QuoteText>
+            <QuoteAuthor id="author">
+              - {quotes[activeQuoteNumber].author}
+            </QuoteAuthor>
+          </GappedFlexColumn>
+        ) : (
+          <div>Error fetching quotes</div>
+        )}
+        <GapRow>
+          {quotes.length !== 0 && (
+            <TweetButton
+              id="tweet-quote"
+              onClick={() => {window.location.href = `https://twitter.com/intent/tweet?text="${quotes[activeQuoteNumber].quote}" -${quotes[activeQuoteNumber].author}&url=https://github.com/c-ehrlich`;}}
+              // href={`https://twitter.com/intent/tweet?text="${quotes[activeQuoteNumber].quote}" -${quotes[activeQuoteNumber].author}&url=https://github.com/c-ehrlich`}
+            >
+              <FontAwesomeIcon icon={faTwitterSquare} color="#1DA1F2" />
+              &nbsp;Tweet
+            </TweetButton>
+          )}
+          <RefreshButton id="new-quote" onClick={getNewQuote}>
+            <FontAwesomeIcon icon={faRedoAlt} color="#3db166" />
+            &nbsp;New Quote
+          </RefreshButton>
+        </GapRow>
+      </GapColumn>
     </StyledQuoteBox>
   );
 };

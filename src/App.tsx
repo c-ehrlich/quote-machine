@@ -9,6 +9,7 @@ const StyledApp = styled.div`
   justify-content: center;
   height: 100vh;
   width: 100vw;
+  background-color: #e6e6e6;
 `;
 
 function App() {
